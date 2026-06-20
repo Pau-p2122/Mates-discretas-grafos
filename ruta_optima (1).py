@@ -1,10 +1,8 @@
-"""
-=============================================================
-  APLICACIÓN: CALCULADORA DE RUTA ÓPTIMA ENTRE CIUDADES
-  Usa grafos ponderados + Algoritmo de Dijkstra
-  Librerías: customtkinter, networkx, matplotlib, pandas
-=============================================================
-"""
+#  CALCULADORA DE RUTA ÓPTIMA ENTRE CIUDADES
+#  Matematica Discreta, Teoria de Grafos
+#  Integrantes:
+#  Paula Pasten, Asher Galvan, Tomas Mardones
+
 
 import pandas as pd
 import networkx as nx
@@ -14,17 +12,12 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import os
 
 
-# ─────────────────────────────────────────────────────────────
 # FUNCIÓN 1: Cargar datos desde el archivo Excel
-# Lee el archivo y construye el grafo con las ciudades y distancias.
-# ─────────────────────────────────────────────────────────────
+
 def cargar_datos(ruta_excel):
-    """
-    Lee el archivo Excel y crea un grafo ponderado no dirigido.
-    Cada fila del Excel es una conexión entre dos ciudades con su distancia.
-    Retorna el grafo (G) y la lista de ciudades disponibles.
-    """
-    df = pd.read_excel(ruta_excel)
+    
+    
+    df = pd.read_excel(ruta_excel) #pd lee excel con los datos de las ciudades y distancias
 
     G = nx.Graph()  # Grafo no dirigido (se puede ir y volver)
 
@@ -39,14 +32,12 @@ def cargar_datos(ruta_excel):
     return G, ciudades
 
 
-# ─────────────────────────────────────────────────────────────
 # FUNCIÓN 2: Calcular la ruta óptima (Dijkstra)
-# Encuentra el camino más corto entre dos ciudades.
-# ─────────────────────────────────────────────────────────────
+
 def calcular_ruta_optima(G, origen, destino):
     """
     Usa el algoritmo de Dijkstra de NetworkX para encontrar
-    la ruta más corta (menor distancia total) entre origen y destino.
+    la ruta más corta entre origen y destino.
     Retorna la lista de ciudades del recorrido y la distancia total.
     Si no hay ruta posible, retorna None.
     """
@@ -58,10 +49,9 @@ def calcular_ruta_optima(G, origen, destino):
         return None, None
 
 
-# ─────────────────────────────────────────────────────────────
 # FUNCIÓN 3: Dibujar el grafo en pantalla
 # Muestra todas las ciudades, conexiones y resalta la ruta óptima.
-# ─────────────────────────────────────────────────────────────
+
 def dibujar_grafo(G, ruta_optima, ax):
     """
     Dibuja el grafo completo en el área de matplotlib.
@@ -72,8 +62,8 @@ def dibujar_grafo(G, ruta_optima, ax):
     """
     ax.clear()  # Limpia el dibujo anterior
 
-    # Usamos un layout de resorte (spring) para distribuir los nodos
-    pos = nx.spring_layout(G, seed=42, k=2.5)
+    
+    pos = nx.spring_layout(G, seed=42, k=2.5)  # Usamos un layout de resorte (spring) para distribuir los nodos
 
     # ── Determinar qué aristas pertenecen a la ruta óptima ──
     aristas_ruta = []
@@ -88,34 +78,34 @@ def dibujar_grafo(G, ruta_optima, ax):
         par  = (arista[0], arista[1])
         par2 = (arista[1], arista[0])
         if par in aristas_ruta or par2 in aristas_ruta:
-            pass  # La agregaremos separado
+            pass 
         else:
             aristas_normales.append(arista)
 
-    # ── Dibujar aristas normales (gris claro, delgadas) ──
+    # ── Dibujar aristas normales (gris claro, delgadas)
     nx.draw_networkx_edges(
         G, pos, edgelist=aristas_normales,
         edge_color="#AAAAAA", width=1.2, alpha=0.5, ax=ax
     )
 
-    # ── Dibujar aristas de la ruta óptima (rojo, gruesas) ──
+    # ── Dibujar aristas de la ruta óptima (rojo, gruesas)
     if aristas_ruta:
         nx.draw_networkx_edges(
             G, pos, edgelist=aristas_ruta,
             edge_color="#E63946", width=4.5, alpha=0.95, ax=ax
         )
 
-    # ── Color de los nodos: destacar origen, destino y ruta ──
+    # ── Color de los nodos: destacar origen, destino y ruta 
     colores_nodos = []
     for nodo in G.nodes():
         if ruta_optima and nodo == ruta_optima[0]:
-            colores_nodos.append("#2DC653")   # Verde → origen
+            colores_nodos.append("#2DC653")   # Verde - origen
         elif ruta_optima and nodo == ruta_optima[-1]:
-            colores_nodos.append("#E63946")   # Rojo → destino
+            colores_nodos.append("#E63946")   # Rojo - destino
         elif ruta_optima and nodo in ruta_optima:
-            colores_nodos.append("#F4A261")   # Naranja → ciudad intermedia
+            colores_nodos.append("#F4A261")   # Naranja - ciudad intermedia
         else:
-            colores_nodos.append("#4895EF")   # Azul → ciudad normal
+            colores_nodos.append("#4895EF")   # Azul - ciudad normal"""
 
     nx.draw_networkx_nodes(
         G, pos, node_color=colores_nodos,
@@ -149,14 +139,12 @@ def dibujar_grafo(G, ruta_optima, ax):
     ]
     ax.legend(handles=leyenda, loc="lower right", fontsize=7, framealpha=0.85)
 
-    ax.set_title("Grafo de Ciudades — Ruta Óptima", fontsize=13, fontweight="bold", pad=10)
+    ax.set_title("Ruta Optima  -  Grafo Ciudades", fontsize=16, color="#FFFFFF", fontweight="bold", pad=20)
     ax.axis("off")
 
 
-# ─────────────────────────────────────────────────────────────
 # FUNCIÓN 4: Construir la interfaz gráfica principal
-# Crea la ventana con todos sus botones, menús y área de gráfico.
-# ─────────────────────────────────────────────────────────────
+
 def construir_interfaz(G, ciudades):
     """
     Crea la ventana principal de la aplicación usando customtkinter.
@@ -173,7 +161,7 @@ def construir_interfaz(G, ciudades):
     ventana.resizable(True, True)
 
     # ── Panel izquierdo: controles ──
-    panel_izq = ctk.CTkFrame(ventana, width=260, corner_radius=12)
+    panel_izq = ctk.CTkFrame(ventana, width=260, corner_radius=0)
     panel_izq.pack(side="left", fill="y", padx=12, pady=12)
     panel_izq.pack_propagate(False)
 
@@ -182,17 +170,10 @@ def construir_interfaz(G, ciudades):
         font=ctk.CTkFont(size=20, weight="bold")
     ).pack(pady=(20, 5))
 
-    ctk.CTkLabel(
-        panel_izq, text="Algoritmo de Dijkstra\nsobre Grafos Ponderados",
-        font=ctk.CTkFont(size=11), text_color="gray"
-    ).pack(pady=(0, 20))
-
-    # Separador visual
-    ctk.CTkFrame(panel_izq, height=2, fg_color="#3a3a3a").pack(fill="x", padx=15, pady=5)
 
     # ── Selector de Ciudad Origen ──
     ctk.CTkLabel(
-        panel_izq, text="📍 Ciudad de Origen:",
+        panel_izq, text=" Ciudad de Origen:",
         font=ctk.CTkFont(size=13, weight="bold")
     ).pack(anchor="w", padx=15, pady=(15, 3))
 
@@ -205,7 +186,7 @@ def construir_interfaz(G, ciudades):
 
     # ── Selector de Ciudad Destino ──
     ctk.CTkLabel(
-        panel_izq, text="🏁 Ciudad de Destino:",
+        panel_izq, text=" Ciudad de Destino:",
         font=ctk.CTkFont(size=13, weight="bold")
     ).pack(anchor="w", padx=15, pady=(5, 3))
 
@@ -228,7 +209,7 @@ def construir_interfaz(G, ciudades):
 
         if origen == destino:
             lbl_resultado.configure(
-                text="⚠️ Origen y destino\nno pueden ser iguales.",
+                text=" Origen y destino\nno pueden ser iguales.",
                 text_color="#F4A261"
             )
             return
@@ -237,7 +218,7 @@ def construir_interfaz(G, ciudades):
 
         if ruta is None:
             lbl_resultado.configure(
-                text="❌ No existe ruta\nentre esas ciudades.",
+                text=" No existe ruta\nentre esas ciudades.",
                 text_color="#E63946"
             )
             dibujar_grafo(G, None, ax)
@@ -253,7 +234,7 @@ def construir_interfaz(G, ciudades):
         canvas.draw()  # Actualizar el gráfico en pantalla
 
     btn_calcular = ctk.CTkButton(
-        panel_izq, text="🔍  Calcular Ruta Óptima",
+        panel_izq, text=" Calcular Ruta Óptima",
         command=al_calcular, height=42,
         font=ctk.CTkFont(size=13, weight="bold"),
         fg_color="#1d6fa4", hover_color="#2980b9"
@@ -268,19 +249,17 @@ def construir_interfaz(G, ciudades):
         canvas.draw()
 
     btn_limpiar = ctk.CTkButton(
-        panel_izq, text="🔄  Limpiar",
+        panel_izq, text="Limpiar",
         command=limpiar, height=36,
         font=ctk.CTkFont(size=12),
         fg_color="#3a3a3a", hover_color="#555555"
     )
     btn_limpiar.pack(padx=15, pady=(5, 20))
 
-    # Separador
-    ctk.CTkFrame(panel_izq, height=2, fg_color="#3a3a3a").pack(fill="x", padx=15, pady=5)
 
     # ── Área de resultado ──
     ctk.CTkLabel(
-        panel_izq, text="📋 Resultado:",
+        panel_izq, text=" Resultado:",
         font=ctk.CTkFont(size=13, weight="bold")
     ).pack(anchor="w", padx=15, pady=(15, 5))
 
@@ -295,7 +274,7 @@ def construir_interfaz(G, ciudades):
     lbl_resultado.pack(padx=15, anchor="w")
 
     # ── Panel derecho: gráfico matplotlib ──
-    panel_der = ctk.CTkFrame(ventana, corner_radius=12)
+    panel_der = ctk.CTkFrame(ventana, corner_radius=0)
     panel_der.pack(side="right", fill="both", expand=True, padx=(0, 12), pady=12)
 
     fig, ax = plt.subplots(figsize=(9, 6.5))
@@ -313,9 +292,8 @@ def construir_interfaz(G, ciudades):
     ventana.mainloop()
 
 
-# ─────────────────────────────────────────────────────────────
 # FUNCIÓN PRINCIPAL: Punto de entrada de la aplicación
-# ─────────────────────────────────────────────────────────────
+
 def main():
     """
     Función principal que coordina todo:
