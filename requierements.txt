@@ -1,0 +1,9 @@
+Requerimientos.
+
+Para ejecutar el probrama, este debe encontrarse en la misma carpeta donde se encuentre el archivo
+"distancias.xlsx"
+requiere tener instalados las osguientes librerias:
+"matplotlib"
+"Pandas"
+"networkx"
+"customtkinter"
