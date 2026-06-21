@@ -7,3 +7,4 @@ requiere tener instalados las osguientes librerias:
 "Pandas"
 "networkx"
 "customtkinter"
+ejecutar archivo "ruta_optima (1).py, desde visual studio code (phyton)
