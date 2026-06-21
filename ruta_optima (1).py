@@ -3,7 +3,7 @@
 #  Integrantes:
 #  Paula Pasten, Asher Galvan, Tomas Mardones
 
-
+#LIBRERIAS
 import pandas as pd
 import networkx as nx
 import matplotlib.pyplot as plt
@@ -11,13 +11,10 @@ import customtkinter as ctk
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import os
 
-
 # FUNCIÓN 1: Cargar datos desde el archivo Excel
-
 def cargar_datos(ruta_excel):
-    
-    
-    df = pd.read_excel(ruta_excel) #pd lee excel con los datos de las ciudades y distancias
+      
+    df = pd.read_excel(ruta_excel) #PANDAS lee excel con los datos de las ciudades y distancias
 
     G = nx.Graph()  # Grafo no dirigido (se puede ir y volver)
 
@@ -31,39 +28,68 @@ def cargar_datos(ruta_excel):
     ciudades = sorted(G.nodes())  # Lista de ciudades en orden alfabético
     return G, ciudades
 
-
-# FUNCIÓN 2: Calcular la ruta óptima (Dijkstra)
-
+# FUNCIÓN 2: Calcular la ruta óptima (Dijkstra manual)
 def calcular_ruta_optima(G, origen, destino):
-    """
-    Usa el algoritmo de Dijkstra de NetworkX para encontrar
-    la ruta más corta entre origen y destino.
-    Retorna la lista de ciudades del recorrido y la distancia total.
-    Si no hay ruta posible, retorna None.
-    """
-    try:
-        ruta = nx.dijkstra_path(G, origen, destino, weight="weight")
-        distancia = nx.dijkstra_path_length(G, origen, destino, weight="weight")
-        return ruta, distancia
-    except nx.NetworkXNoPath:
+ 
+    # ── Inicialización ──
+    distancias   = {nodo: float("inf") for nodo in G.nodes()}
+    predecesores = {nodo: None        for nodo in G.nodes()}
+    distancias[origen] = 0
+    no_visitados = set(G.nodes())
+
+    while no_visitados:
+        # Seleccionar el nodo no visitado con menor distancia acumulada
+        nodo_actual = min(no_visitados, key=lambda n: distancias[n])
+
+        # Si la distancia mínima es infinita, los nodos restantes son inalcanzables
+        if distancias[nodo_actual] == float("inf"):
+            break
+
+        # Si llegamos al destino, no es necesario seguir explorando
+        if nodo_actual == destino:
+            break
+
+        no_visitados.remove(nodo_actual)
+
+        # Revisar cada vecino del nodo actual
+        for vecino, atributos in G[nodo_actual].items():
+            if vecino not in no_visitados:
+                continue  # Ya fue visitado, saltar
+
+            peso = atributos.get("weight", 1)
+            distancia_tentativa = distancias[nodo_actual] + peso
+
+            # Si encontramos un camino más corto hacia este vecino, actualizarlo
+            if distancia_tentativa < distancias[vecino]:
+                distancias[vecino]   = distancia_tentativa
+                predecesores[vecino] = nodo_actual
+
+    # ── Verificar si el destino es alcanzable ──
+    if distancias[destino] == float("inf"):
         return None, None
+
+    # ── Reconstruir la ruta siguiendo predecesores (de destino a origen) ──
+    ruta = []
+    nodo = destino
+    while nodo is not None:
+        ruta.append(nodo)
+        nodo = predecesores[nodo]
+
+    ruta.reverse()  # Invertir para obtener el orden origen - destino
+
+    # Verificar que la ruta realmente parte desde el origen
+    if ruta[0] != origen:
+        return None, None
+
+    return ruta, distancias[destino]
 
 
 # FUNCIÓN 3: Dibujar el grafo en pantalla
-# Muestra todas las ciudades, conexiones y resalta la ruta óptima.
-
 def dibujar_grafo(G, ruta_optima, ax):
-    """
-    Dibuja el grafo completo en el área de matplotlib.
-    - Nodos: círculos de color representando cada ciudad
-    - Aristas grises: todas las conexiones existentes
-    - Aristas rojas gruesas: la ruta óptima encontrada
-    - Etiquetas: nombre de cada ciudad y distancias en km
-    """
+   
     ax.clear()  # Limpia el dibujo anterior
 
-    
-    pos = nx.spring_layout(G, seed=42, k=2.5)  # Usamos un layout de resorte (spring) para distribuir los nodos
+    pos = nx.spring_layout(G, seed=42, k=2.5)  # la forma en que muestra los nodos y sus aristas
 
     # ── Determinar qué aristas pertenecen a la ruta óptima ──
     aristas_ruta = []
@@ -82,13 +108,13 @@ def dibujar_grafo(G, ruta_optima, ax):
         else:
             aristas_normales.append(arista)
 
-    # ── Dibujar aristas normales (gris claro, delgadas)
+    # ── Dibujar aristas normales
     nx.draw_networkx_edges(
         G, pos, edgelist=aristas_normales,
         edge_color="#AAAAAA", width=1.2, alpha=0.5, ax=ax
     )
 
-    # ── Dibujar aristas de la ruta óptima (rojo, gruesas)
+    # ── Dibujar aristas de la ruta óptima
     if aristas_ruta:
         nx.draw_networkx_edges(
             G, pos, edgelist=aristas_ruta,
@@ -146,11 +172,6 @@ def dibujar_grafo(G, ruta_optima, ax):
 # FUNCIÓN 4: Construir la interfaz gráfica principal
 
 def construir_interfaz(G, ciudades):
-    """
-    Crea la ventana principal de la aplicación usando customtkinter.
-    Incluye: menús desplegables para origen/destino, botón calcular,
-    área de resultado textual y el canvas con el grafo de matplotlib.
-    """
     # ── Configuración visual de CustomTkinter ──
     ctk.set_appearance_mode("dark")
     ctk.set_default_color_theme("blue")
@@ -169,7 +190,6 @@ def construir_interfaz(G, ciudades):
         panel_izq, text="Ruta Óptima",
         font=ctk.CTkFont(size=20, weight="bold")
     ).pack(pady=(20, 5))
-
 
     # ── Selector de Ciudad Origen ──
     ctk.CTkLabel(
@@ -199,11 +219,7 @@ def construir_interfaz(G, ciudades):
 
     # ── Botón Calcular Ruta ──
     def al_calcular():
-        """
-        Función que se ejecuta al presionar el botón 'Calcular'.
-        Obtiene las ciudades seleccionadas, calcula la ruta y actualiza
-        tanto el texto de resultado como el gráfico del grafo.
-        """
+      
         origen  = combo_origen.get()
         destino = combo_destino.get()
 
@@ -226,7 +242,7 @@ def construir_interfaz(G, ciudades):
             # Construir texto de la secuencia de ciudades
             secuencia = " ➜ ".join(ruta)
             lbl_resultado.configure(
-                text=f"✅ Ruta encontrada:\n\n{secuencia}\n\n📏 Distancia total:\n{distancia:,.0f} km",
+                text=f"✅ Ruta encontrada:\n\n{secuencia}\n\n Distancia total:\n{distancia:,.0f} km",
                 text_color="#2DC653"
             )
             dibujar_grafo(G, ruta, ax)
@@ -243,7 +259,6 @@ def construir_interfaz(G, ciudades):
 
     # ── Botón Limpiar / Reset ──
     def limpiar():
-        """Limpia el resultado y vuelve a dibujar el grafo sin ruta seleccionada."""
         lbl_resultado.configure(text="Selecciona origen\ny destino, luego\npresiona Calcular.", text_color="gray")
         dibujar_grafo(G, None, ax)
         canvas.draw()
@@ -291,16 +306,9 @@ def construir_interfaz(G, ciudades):
 
     ventana.mainloop()
 
-
 # FUNCIÓN PRINCIPAL: Punto de entrada de la aplicación
 
 def main():
-    """
-    Función principal que coordina todo:
-    1. Busca el archivo Excel de distancias
-    2. Carga los datos y construye el grafo
-    3. Lanza la interfaz gráfica
-    """
     # Busca el archivo Excel en la misma carpeta que este script
     ruta_excel = os.path.join(os.path.dirname(os.path.abspath(__file__)), "distancias.xlsx")
 
