@@ -242,7 +242,7 @@ def construir_interfaz(G, ciudades):
             # Construir texto de la secuencia de ciudades
             secuencia = " ➜ ".join(ruta)
             lbl_resultado.configure(
-                text=f"✅ Ruta encontrada:\n\n{secuencia}\n\n Distancia total:\n{distancia:,.0f} km",
+                text=f"Ruta encontrada:\n\n{secuencia}\n\n Distancia total:\n{distancia:,.0f} km",
                 text_color="#2DC653"
             )
             dibujar_grafo(G, ruta, ax)
@@ -319,7 +319,7 @@ def main():
 
     print("Cargando datos del archivo Excel...")
     G, ciudades = cargar_datos(ruta_excel)
-    print(f"✅ Grafo cargado: {len(ciudades)} ciudades, {G.number_of_edges()} conexiones.")
+    print(f"Grafo cargado: {len(ciudades)} ciudades, {G.number_of_edges()} conexiones.")
 
     print("Iniciando interfaz gráfica...")
     construir_interfaz(G, ciudades)
