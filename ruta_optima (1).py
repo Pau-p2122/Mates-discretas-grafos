@@ -89,7 +89,7 @@ def dibujar_grafo(G, ruta_optima, ax):
    
     ax.clear()  # Limpia el dibujo anterior
 
-    pos = nx.spring_layout(G, seed=42, k=2.5)  # la forma en que muestra los nodos y sus aristas
+    pos = nx.circular_layout(G)  # la forma en que muestra los nodos y sus aristas
 
     # ── Determinar qué aristas pertenecen a la ruta óptima ──
     aristas_ruta = []
